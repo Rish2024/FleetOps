@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function Navbar({ onNavigate, currentView }) {
+export default function Navbar({ onNavigate, currentView, user }) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Simple helper to scroll to sections
@@ -81,12 +81,36 @@ export default function Navbar({ onNavigate, currentView }) {
           >
             Contact
           </button>
+          {user && (
+            <button 
+              onClick={() => handleNavigate('manager-dashboard')}
+              className={`text-sm font-semibold transition-colors focus:outline-none focus-visible:text-blue-600 cursor-pointer ${
+                currentView === 'manager-dashboard' 
+                  ? 'text-blue-600' 
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Manager Console
+            </button>
+          )}
         </nav>
 
         {/* Desktop CTA & Hamburger Wrapper */}
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-3">
-            {currentView === 'login' ? (
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg select-none">
+                  Manager: {user.email.split('@')[0]}
+                </span>
+                <button 
+                  onClick={() => handleNavigate('logout')}
+                  className="text-sm font-semibold text-red-600 hover:text-red-700 active:text-red-800 transition-colors px-3 py-1.5 focus:outline-none focus-visible:underline rounded-lg cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : currentView === 'login' ? (
               <button
                 onClick={() => handleNavigate('home')}
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-4 py-2 cursor-pointer"
@@ -161,10 +185,32 @@ export default function Navbar({ onNavigate, currentView }) {
             >
               Contact
             </button>
+            {user && (
+              <button 
+                onClick={() => handleNavigate('manager-dashboard')}
+                className={`text-sm font-semibold py-1.5 focus:outline-none cursor-pointer text-left ${
+                  currentView === 'manager-dashboard' ? 'text-blue-600' : 'text-slate-600'
+                }`}
+              >
+                Manager Console
+              </button>
+            )}
             
             <hr className="border-slate-100 my-1" />
             
-            {currentView === 'login' ? (
+            {user ? (
+              <div className="flex flex-col gap-3">
+                <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 py-2.5 rounded-lg text-center select-none">
+                  Manager: {user.email.split('@')[0]}
+                </span>
+                <button 
+                  onClick={() => handleNavigate('logout')}
+                  className="w-full text-center text-sm font-semibold text-red-650 border border-red-200 py-2.5 rounded-lg hover:bg-red-50 focus:outline-none cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : currentView === 'login' ? (
               <button
                 onClick={() => handleNavigate('home')}
                 className="text-sm font-semibold text-slate-600 py-2 focus:outline-none cursor-pointer text-center"

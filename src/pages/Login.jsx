@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
 
-export default function Login({ onNavigate }) {
+export default function Login({ onNavigate, onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,9 +32,15 @@ export default function Login({ onNavigate }) {
       setIsLoading(false);
       setSuccess(true);
       
-      // Redirect to Home after success transition
+      // Redirect or invoke onLogin
       setTimeout(() => {
-        onNavigate('home');
+        const isManager = email.toLowerCase().includes('manager');
+        const role = isManager ? 'manager' : 'driver';
+        if (onLogin) {
+          onLogin({ email, role });
+        } else {
+          onNavigate('home');
+        }
       }, 1000);
     }, 1500);
   };
@@ -198,6 +204,30 @@ export default function Login({ onNavigate }) {
               </div>
 
             </form>
+          )}
+
+          {!success && (
+            <div className="mt-5 pt-5 border-t border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center mb-2.5">
+                Quick Demo Access
+              </p>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('manager@fleetops.com');
+                    setPassword('manager123');
+                  }}
+                  className="w-full inline-flex items-center justify-between px-3.5 py-2.5 border border-blue-100 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50/50 hover:bg-blue-50 transition-all cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                    Manager Console
+                  </span>
+                  <span className="text-[10px] text-blue-400 font-medium">Click to autofill</span>
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
