@@ -4,12 +4,41 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import ManagerDashboard from './pages/ManagerDashboard';
+import DriverDashboard from './pages/DriverDashboard';
+import ExportHub from './pages/ExportHub';
+import { INITIAL_VEHICLES, INITIAL_LOGS } from './pages/mockData';
+import { api } from './api';
 
 function App() {
   const [view, setView] = useState('home');
   const [user, setUser] = useState(null);
+  const [vehicles, setVehicles] = useState(INITIAL_VEHICLES);
+  const [logs, setLogs] = useState(INITIAL_LOGS);
 
-  // Simple hash-based routing to support browser back/forward navigation
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedVehicles = await api.getVehicles();
+        setVehicles(fetchedVehicles);
+      } catch {
+        console.warn('Backend API connection failed, running in sandbox mode with local vehicle state.');
+      }
+
+      try {
+        const fetchedLogs = await api.getLogs();
+        setLogs(fetchedLogs);
+      } catch {
+        console.warn('Backend API connection failed, running in sandbox mode with local event logs.');
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 3000); 
+    return () => clearInterval(interval);
+  }, []);
+
+  
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
@@ -18,15 +47,23 @@ function App() {
         window.scrollTo(0, 0);
       } else if (hash === '#/dashboard' || hash === '#/manager-dashboard') {
         setView('manager-dashboard');
-        // Auto-login as manager if no session exists for easy testing
+        
         setUser(prev => prev || { email: 'manager@fleetops.com', role: 'manager' });
+        window.scrollTo(0, 0);
+      } else if (hash === '#/driver' || hash === '#/driver-dashboard') {
+        setView('driver-dashboard');
+        
+        setUser(prev => prev || { email: 'driver@fleetops.com', role: 'driver' });
+        window.scrollTo(0, 0);
+      } else if (hash === '#/export-hub') {
+        setView('export-hub');
         window.scrollTo(0, 0);
       } else {
         setView('home');
       }
     };
 
-    // Check hash on load
+    
     handleHashChange();
 
     window.addEventListener('hashchange', handleHashChange);
@@ -38,6 +75,10 @@ function App() {
       window.location.hash = '#/login';
     } else if (newView === 'manager-dashboard') {
       window.location.hash = '#/dashboard';
+    } else if (newView === 'driver-dashboard') {
+      window.location.hash = '#/driver';
+    } else if (newView === 'export-hub') {
+      window.location.hash = '#/export-hub';
     } else if (newView === 'logout') {
       setUser(null);
       window.location.hash = '#/';
@@ -48,8 +89,10 @@ function App() {
 
   const handleLogin = (loggedInUser) => {
     setUser(loggedInUser);
-    if (loggedInUser.role === 'manager') {
+    if (loggedInUser.role === 'manager' || loggedInUser.role === 'admin') {
       navigateTo('manager-dashboard');
+    } else if (loggedInUser.role === 'driver') {
+      navigateTo('driver-dashboard');
     } else {
       navigateTo('home');
     }
@@ -64,7 +107,21 @@ function App() {
           <Navbar onNavigate={navigateTo} currentView={view} user={user} />
           <main className="flex-grow">
             {view === 'manager-dashboard' ? (
-              <ManagerDashboard />
+              <ManagerDashboard 
+                vehicles={vehicles} 
+                setVehicles={setVehicles} 
+                logs={logs} 
+                setLogs={setLogs} 
+              />
+            ) : view === 'driver-dashboard' ? (
+              <DriverDashboard 
+                vehicles={vehicles} 
+                setVehicles={setVehicles} 
+                setLogs={setLogs}
+                user={user}
+              />
+            ) : view === 'export-hub' ? (
+              <ExportHub onNavigate={navigateTo} user={user} />
             ) : (
               <Home onNavigate={navigateTo} />
             )}
