@@ -81,17 +81,29 @@ export default function Navbar({ onNavigate, currentView, user }) {
           >
             Contact
           </button>
-          {user && (
-            <button 
-              onClick={() => handleNavigate('manager-dashboard')}
-              className={`text-sm font-semibold transition-colors focus:outline-none focus-visible:text-blue-600 cursor-pointer ${
-                currentView === 'manager-dashboard' 
-                  ? 'text-blue-600' 
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Manager Console
-            </button>
+          {user && (user.role === 'manager' || user.role === 'admin') && (
+            <>
+              <button 
+                onClick={() => handleNavigate('manager-dashboard')}
+                className={`text-sm font-semibold transition-colors focus:outline-none focus-visible:text-blue-600 cursor-pointer ${
+                  currentView === 'manager-dashboard' 
+                    ? 'text-blue-600' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Manager Console
+              </button>
+              <button 
+                onClick={() => handleNavigate('export-hub')}
+                className={`text-sm font-semibold transition-colors focus:outline-none focus-visible:text-blue-600 cursor-pointer ${
+                  currentView === 'export-hub' 
+                    ? 'text-blue-600' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Export Hub
+              </button>
+            </>
           )}
         </nav>
 
@@ -100,8 +112,8 @@ export default function Navbar({ onNavigate, currentView, user }) {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg select-none">
-                  Manager: {user.email.split('@')[0]}
+                <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg select-none capitalize font-sans">
+                  {user.role === 'admin' ? 'System Admin' : user.role === 'manager' ? 'Manager' : 'Driver'}: {user.email.split('@')[0]}
                 </span>
                 <button 
                   onClick={() => handleNavigate('logout')}
@@ -185,23 +197,33 @@ export default function Navbar({ onNavigate, currentView, user }) {
             >
               Contact
             </button>
-            {user && (
-              <button 
-                onClick={() => handleNavigate('manager-dashboard')}
-                className={`text-sm font-semibold py-1.5 focus:outline-none cursor-pointer text-left ${
-                  currentView === 'manager-dashboard' ? 'text-blue-600' : 'text-slate-600'
-                }`}
-              >
-                Manager Console
-              </button>
-            )}
+             {user && (user.role === 'manager' || user.role === 'admin') && (
+               <>
+                 <button 
+                   onClick={() => handleNavigate('manager-dashboard')}
+                   className={`text-sm font-semibold py-1.5 focus:outline-none cursor-pointer text-left ${
+                     currentView === 'manager-dashboard' ? 'text-blue-600' : 'text-slate-600'
+                   }`}
+                 >
+                   Manager Console
+                 </button>
+                 <button 
+                   onClick={() => handleNavigate('export-hub')}
+                   className={`text-sm font-semibold py-1.5 focus:outline-none cursor-pointer text-left ${
+                     currentView === 'export-hub' ? 'text-blue-600' : 'text-slate-600'
+                   }`}
+                 >
+                   Export Hub
+                 </button>
+               </>
+             )}
             
             <hr className="border-slate-100 my-1" />
             
             {user ? (
               <div className="flex flex-col gap-3">
-                <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 py-2.5 rounded-lg text-center select-none">
-                  Manager: {user.email.split('@')[0]}
+                <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 py-2.5 rounded-lg text-center select-none capitalize">
+                  {user.role === 'admin' ? 'System Admin' : user.role === 'manager' ? 'Manager' : 'Driver'}: {user.email.split('@')[0]}
                 </span>
                 <button 
                   onClick={() => handleNavigate('logout')}

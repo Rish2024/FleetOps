@@ -4,10 +4,23 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import ManagerDashboard from './pages/ManagerDashboard';
+import ExportHub from './pages/ExportHub';
 
 function App() {
   const [view, setView] = useState('home');
   const [user, setUser] = useState(null);
+
+  // Restore user session from localStorage on boot
+  useEffect(() => {
+    const savedUser = localStorage.getItem('fleetops_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('fleetops_user');
+      }
+    }
+  }, []);
 
   // Simple hash-based routing to support browser back/forward navigation
   useEffect(() => {
@@ -20,6 +33,9 @@ function App() {
         setView('manager-dashboard');
         // Auto-login as manager if no session exists for easy testing
         setUser(prev => prev || { email: 'manager@fleetops.com', role: 'manager' });
+        window.scrollTo(0, 0);
+      } else if (hash === '#/export-hub') {
+        setView('export-hub');
         window.scrollTo(0, 0);
       } else {
         setView('home');
@@ -38,8 +54,11 @@ function App() {
       window.location.hash = '#/login';
     } else if (newView === 'manager-dashboard') {
       window.location.hash = '#/dashboard';
+    } else if (newView === 'export-hub') {
+      window.location.hash = '#/export-hub';
     } else if (newView === 'logout') {
       setUser(null);
+      localStorage.removeItem('fleetops_user');
       window.location.hash = '#/';
     } else {
       window.location.hash = '#/';
@@ -48,7 +67,8 @@ function App() {
 
   const handleLogin = (loggedInUser) => {
     setUser(loggedInUser);
-    if (loggedInUser.role === 'manager') {
+    localStorage.setItem('fleetops_user', JSON.stringify(loggedInUser));
+    if (loggedInUser.role === 'manager' || loggedInUser.role === 'admin') {
       navigateTo('manager-dashboard');
     } else {
       navigateTo('home');
@@ -65,6 +85,8 @@ function App() {
           <main className="flex-grow">
             {view === 'manager-dashboard' ? (
               <ManagerDashboard />
+            ) : view === 'export-hub' ? (
+              <ExportHub onNavigate={navigateTo} user={user} />
             ) : (
               <Home onNavigate={navigateTo} />
             )}
@@ -77,3 +99,4 @@ function App() {
 }
 
 export default App;
+

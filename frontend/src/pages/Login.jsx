@@ -16,7 +16,7 @@ export default function Login({ onNavigate, onLogin }) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -33,22 +33,42 @@ export default function Login({ onNavigate, onLogin }) {
 
     setIsLoading(true);
 
-    // Mock API request
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Authentication failed.');
+      }
+
       setIsLoading(false);
       setSuccess(true);
       
       // Redirect or invoke onLogin
       setTimeout(() => {
-        const isManager = email.toLowerCase().includes('manager');
-        const role = isManager ? 'manager' : 'driver';
+        // Map backend roles (Admin -> admin, FleetManager -> manager, Driver -> driver)
+        let mappedRole = 'driver';
+        if (data.role === 'Admin') mappedRole = 'admin';
+        if (data.role === 'FleetManager') mappedRole = 'manager';
+        
         if (onLogin) {
-          onLogin({ email, role });
+          onLogin({ email: data.email, role: mappedRole });
         } else {
           onNavigate('home');
         }
       }, 1000);
-    }, 1500);
+
+    } catch (err) {
+      setIsLoading(false);
+      setError(err.message || 'API connection failed. Make sure backend server is running.');
+    }
   };
 
   return (
@@ -218,19 +238,52 @@ export default function Login({ onNavigate, onLogin }) {
                 Quick Demo Access
               </p>
               <div className="grid grid-cols-1 gap-2">
+                {/* Admin Autofill */}
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail(DEMO_CREDENTIALS.email);
-                    setPassword(DEMO_CREDENTIALS.password);
+                    setEmail('admin@fleetops.com');
+                    setPassword('admin123');
                   }}
-                  className="w-full inline-flex items-center justify-between px-3.5 py-2.5 border border-blue-100 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50/50 hover:bg-blue-50 transition-all cursor-pointer"
+                  className="w-full inline-flex items-center justify-between px-3.5 py-2 border border-purple-100 rounded-lg text-xs font-semibold text-purple-700 bg-purple-50/50 hover:bg-purple-50 transition-all cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                    Admin Console (Export Hub Access)
+                  </span>
+                  <span className="text-[10px] text-purple-400 font-medium">Autofill</span>
+                </button>
+
+                {/* Manager Autofill */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('manager@fleetops.com');
+                    setPassword('manager123');
+                  }}
+                  className="w-full inline-flex items-center justify-between px-3.5 py-2 border border-blue-100 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50/50 hover:bg-blue-50 transition-all cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                    Manager Console
+                    Manager Console (Export Hub Access)
                   </span>
-                  <span className="text-[10px] text-blue-400 font-medium">Click to autofill</span>
+                  <span className="text-[10px] text-blue-400 font-medium">Autofill</span>
+                </button>
+
+                {/* Driver Autofill */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('driver@fleetops.com');
+                    setPassword('driver123');
+                  }}
+                  className="w-full inline-flex items-center justify-between px-3.5 py-2 border border-emerald-100 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50/50 hover:bg-emerald-50 transition-all cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Driver Console (403 Forbidden Test)
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-medium">Autofill</span>
                 </button>
               </div>
             </div>
