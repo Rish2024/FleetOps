@@ -34,9 +34,7 @@ export default function ExportHub({ onNavigate, user }) {
       // Hit the backend endpoint with role query param fallback and cache-buster
       const response = await fetch(`http://localhost:5000/api/reports/export-csv?range=${dateRange}&role=${roleToSend}&_t=${Date.now()}`, {
         method: 'GET',
-        headers: {
-          'x-user-role': roleToSend
-        }
+        headers: headers
       });
 
       if (!response.ok) {
