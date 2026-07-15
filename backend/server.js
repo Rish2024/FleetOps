@@ -33,10 +33,13 @@ const MOCK_REPORT_DATA = [
 // Mock Authorization Middleware
 function verifyRole(allowedRoles) {
   return (req, res, next) => {
-    // Read the mock role sent by the client
-    const userRole = req.headers['x-user-role'];
+    console.log('Incoming headers for verification:', req.headers);
+    console.log('Incoming query params:', req.query);
+    // Read the mock role sent by the client (header fallback to query param)
+    const userRole = req.headers['x-user-role'] || req.query.role;
     
     if (!userRole) {
+      console.log('No x-user-role header or query parameter found in request.');
       return res.status(401).json({ message: 'Unauthorized: No operational role provided.' });
     }
     
